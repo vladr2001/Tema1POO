@@ -75,4 +75,22 @@ public final class Constants {
     public static final int MAX_LENGTH = 50;
 
     // add any constants you think you may use
+    public static final String favErrDuplicate1 = "error -> ";
+    public static final String getFavErrDuplicate2 = " is already in favourite list";
+    public static final String favErrInvalid1 = "error -> ";
+    public static final String favErrInvalid2 = " is not seen";
+    public static final String favSuccess1 = "success -> ";
+    public static final String getFavSuccess2 = " was added as favourite";
+    public static final int favId = 1;
+    public static final int viewConst = 1;
+    public static final String viewSuccess1 = "success -> ";
+    public static final String viewSuccess2 =  " was viewed with total views of ";
+    public static final int viewId = 1;
+    public static final String rateSuccess1 = "success -> ";
+    public static final String rateSuccess2 = " was rated with ";
+    public static final String rateSuccess3 = " by ";
+    public static final int rateId = 1;
+    public static final String queryResult = "Query result: ";
+    public static final String err = "error -> ";
+    public static final String alreadyVoted = " has been already rated";
 }

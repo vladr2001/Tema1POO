@@ -1,32 +1,102 @@
 package main;
 
+import common.Constants;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class User {
-  public String category;
-  public ArrayList<Video> favs;
-  public ArrayList<Watched> views;
+  private String username;
+  private String category;
+  private ArrayList<String> favs;
+  private Map<String, Integer> views;
+  private Integer noRatings;
 
-  public User(String category, ArrayList<Video> favs, ArrayList<Watched> views) {
-    int sem = 0;
+  public User(String username, String category, ArrayList<String> favs, Map<String, Integer> views) {
+    this.username = username;
     this.category = category;
+    this.views = views;
     this.favs = new ArrayList<>();
-    this.views = new ArrayList<>();
-    for (Watched i:views) {
-      this.views.add(i);
+    this.noRatings = 0;
+
+    for (int i = 0; i < favs.size(); i++) {
+      if (views.get(favs.get(i)) != null) {
+        this.favs.add(favs.get(i));
+      }
+    }
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public String getCategory() {
+    return category;
+  }
+
+  public void setCategory(String category) {
+    this.category = category;
+  }
+
+  public ArrayList<String> getFavs() {
+    return favs;
+  }
+
+  public void setFavs(ArrayList<String> favs) {
+    this.favs = favs;
+  }
+
+  public Map<String, Integer> getViews() {
+    return views;
+  }
+
+  public void setViews(Map<String, Integer> views) {
+    this.views = views;
+  }
+
+  public Integer getNoRatings() {
+    return this.noRatings;
+  }
+
+  public void setNoRatings(int noRatings) {
+    this.noRatings = noRatings;
+  }
+
+  public String addFavourite(String fav) {
+    // System.out.println("intra in fav");
+    if (fav == null) {
+      return null;
+    }
+    if (this.views.get(fav) == null) {
+      return Constants.favErrInvalid1 + fav + Constants.favErrInvalid2;
     }
 
-    for (Video i:favs) {
-      sem = 0;
-      for (Watched j:views) {
-        if (i.title == j.video.title) {
-          sem = 1;
-        }
+    for (String i : this.favs) {
+      if (i.equals(fav) == true) {
+        return Constants.favErrDuplicate1 + fav + Constants.getFavErrDuplicate2;
       }
+    }
 
-      if (sem == 1) {
-        this.favs.add(i);
-      }
+    this.favs.add(fav);
+    return Constants.favSuccess1 + fav + Constants.getFavSuccess2;
+  }
+
+  public String addView(String video) {
+    if (video == null) {
+      return null;
+    }
+
+    if (this.views.containsKey(video)) {
+      this.views.replace(video, this.views.get(video) + 1);
+      return Constants.viewSuccess1 + video + Constants.viewSuccess2 + this.views.get(video);
+    } else {
+      this.views.put(video, Constants.viewConst);
+      return Constants.viewSuccess1 + video + Constants.viewSuccess2 + Constants.viewConst;
     }
   }
 }
