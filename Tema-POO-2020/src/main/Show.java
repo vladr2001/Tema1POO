@@ -2,16 +2,18 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 
 import common.Constants;
 import entertainment.Season;
 
 public class Show extends Video{
   private ArrayList<mySeason> seasons;
-  private float rating;
+  private double rating;
+  private int length;
 
   public Show(String title, int year, ArrayList<String> genres, ArrayList<String> cast, ArrayList<Season> s) {
-    super(title, year, genres, cast);
+    super(title, year, genres, cast, 0);
     mySeason aux;
     this.seasons =  new ArrayList<>();
     for (int i = 0; i < s.size(); i++) {
@@ -29,12 +31,20 @@ public class Show extends Video{
     this.seasons = seasons;
   }
 
-  public float getRating() {
+  public double getRating() {
     return rating;
   }
 
   public void setRating(float rating) {
     this.rating = rating;
+  }
+
+  public void makeDuration() {
+    int duration = 0;
+    for (mySeason s : seasons) {
+      duration = duration + s.getDuration();
+    }
+    this.setDuration(duration);
   }
 
   public double makeShowRating() {
@@ -52,17 +62,23 @@ public class Show extends Video{
     }
 
     if (rating != -1) {
-      rating = rating / noRates;
+      rating = rating / this.seasons.size();
     }
 
     return rating;
   }
 
-  public String addRating(double rating, int seasonNo, String username, Hashtable<String, User> users) {
+  public String addRating(double rating, int seasonNo, String username, LinkedHashMap<String, User> users) {
+    User u = users.get(username);
+
     for (String i : this.seasons.get(seasonNo - 1).getRatedBy()) {
       if (i.equals(username)) {
         return Constants.err + this.getTitle() + Constants.alreadyVoted;
       }
+    }
+
+    if (!u.getViews().containsKey(this.getTitle())) {
+      return Constants.err + this.getTitle() + Constants.notSeen;
     }
 
     this.seasons.get(seasonNo - 1).addRating(rating);

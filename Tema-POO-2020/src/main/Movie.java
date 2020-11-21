@@ -4,26 +4,18 @@ import common.Constants;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 
 public class Movie extends Video{
-  private int length;
   private ArrayList<Double> ratings;
   private ArrayList<String> ratedBy;
 
   public Movie(String title, int year, ArrayList<String> genres, ArrayList<String> cast, int length) {
-    super(title, year, genres, cast);
-    this.length = length;
+    super(title, year, genres, cast, length);
     this.ratings = new ArrayList<>();
     this.ratedBy = new ArrayList<>();
   }
 
-  public int getLength() {
-    return length;
-  }
-
-  public void setLength(int length) {
-    this.length = length;
-  }
 
   public ArrayList<Double> getRatings() {
     return ratings;
@@ -56,11 +48,17 @@ public class Movie extends Video{
     return rating;
   }
 
-  public String addRating(double rating, String username, Hashtable<String, User> users) {
+  public String addRating(double rating, String username, LinkedHashMap<String, User> users) {
+    User u = users.get(username);
+
     for (String i : ratedBy) {
       if (i.equals(username)) {
         return Constants.err + this.getTitle() + Constants.alreadyVoted;
       }
+    }
+
+    if (!u.getViews().containsKey(this.getTitle())) {
+      return Constants.err + this.getTitle() + Constants.notSeen;
     }
 
     this.ratings.add(rating);
@@ -68,5 +66,11 @@ public class Movie extends Video{
     users.get(username).setNoRatings(users.get(username).getNoRatings() + 1);
     return Constants.rateSuccess1 + this.getTitle() + Constants.rateSuccess2 + rating + Constants.rateSuccess3
             + username;
+  }
+
+
+  @Override
+  public String toString() {
+    return this.getTitle();
   }
 }

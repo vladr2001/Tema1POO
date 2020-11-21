@@ -4,9 +4,10 @@ import common.Constants;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
-public class User {
+public class User implements Comparable<User> {
   private String username;
   private String category;
   private ArrayList<String> favs;
@@ -97,6 +98,15 @@ public class User {
     } else {
       this.views.put(video, Constants.viewConst);
       return Constants.viewSuccess1 + video + Constants.viewSuccess2 + Constants.viewConst;
+    }
+  }
+
+  @Override
+  public int compareTo(User o) {
+    if (Integer.compare(this.getNoRatings(), o.getNoRatings()) != 0) {
+      return Integer.compare(this.getNoRatings(), o.getNoRatings());
+    } else {
+      return String.CASE_INSENSITIVE_ORDER.compare(this.getUsername(), o.getUsername());
     }
   }
 }

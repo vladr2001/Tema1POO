@@ -93,4 +93,13 @@ public final class Constants {
     public static final String queryResult = "Query result: ";
     public static final String err = "error -> ";
     public static final String alreadyVoted = " has been already rated";
+    public static final String alphabet = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+    public static final String notSeen = " is not seen";
+    public static final String applied = " cannot be applied!";
+    public static final String standardRecommendation = "StandardRecommendation";
+    public static final String result = " result: ";
+    public static final String bestRatedRecommendation = "BestRatedUnseenRecommendation";
+    public static final String popularRecommendation = "PopularRecommendation";
+    public static final String favoriteRecommendation = "FavoriteRecommendation";
+    public static final String searchRecommendation = "SearchRecommendation";
 }

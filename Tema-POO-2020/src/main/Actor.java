@@ -1,26 +1,32 @@
 package main;
 
 import actor.ActorsAwards;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 public class Actor implements  Comparable<Actor>{
   private String name;
   private String careerDesc;
   private ArrayList<String> videos;
-  private Map<ActorsAwards, Integer> awards;
+  private Hashtable<String, Integer> awards;
   private Double rating;
   private List<String> relevantAwards;
   private String queryCriteria;
+  private int noAwards;
 
   public Actor(String name, String careerDesc, ArrayList<String> videos, Map<ActorsAwards, Integer> awards) {
     this.name = name;
     this.careerDesc = careerDesc;
     this.videos = videos;
-    this.awards = awards;
     this.rating = 0.00;
+    this.awards = new Hashtable<String, Integer>();
+    this.noAwards = 0;
+    for (ActorsAwards a : awards.keySet()) {
+      String s = a.toString();
+      int nr = awards.get(a);
+      this.awards.put(s, nr);
+      this.noAwards = this.noAwards + nr;
+    }
   }
 
   public String getName() {
@@ -47,11 +53,11 @@ public class Actor implements  Comparable<Actor>{
     this.videos = videos;
   }
 
-  public Map<ActorsAwards, Integer> getAwards() {
+  public Map<String, Integer> getAwards() {
     return awards;
   }
 
-  public void setAwards(Map<ActorsAwards, Integer> awards) {
+  public void setAwards(Hashtable<String, Integer> awards) {
     this.awards = awards;
   }
 
@@ -75,7 +81,15 @@ public class Actor implements  Comparable<Actor>{
     return this.queryCriteria;
   }
 
-  public void makeRating(Hashtable<String, Movie> movies, Hashtable<String, Show> shows) {
+  public void setNoAwards(int noAwards) {
+    this.noAwards = noAwards;
+  }
+
+  public int getNoAwards() {
+    return this.noAwards;
+  }
+
+  public void makeRating(LinkedHashMap<String, Movie> movies, LinkedHashMap<String, Show> shows) {
     double rating = -1;
     int noRates = 0;
     Movie movie;
@@ -123,12 +137,10 @@ public class Actor implements  Comparable<Actor>{
         return String.CASE_INSENSITIVE_ORDER.compare(this.getName(), o.getName());
       }
     } else if (this.queryCriteria.equals("awards")) {
-      for (String i : this.getRelevantAwards()) {
-        if (this.getAwards().get(i) != o.getAwards().get(i)) {
-          return this.getAwards().get(i) - o.getAwards().get(i);
-        }
+      if (this.noAwards != o.noAwards) {
+        return Integer.compare(this.noAwards, o.noAwards);
       }
-      return 0;
+      return String.CASE_INSENSITIVE_ORDER.compare(this.getName(), o.getName());
     } else if (this.queryCriteria.equals("filter")) {
       return String.CASE_INSENSITIVE_ORDER.compare(this.getName(), o.getName());
     }

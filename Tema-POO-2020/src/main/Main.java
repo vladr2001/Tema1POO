@@ -8,6 +8,7 @@ import fileio.InputLoader;
 import fileio.Writer;
 import org.json.simple.JSONArray;
 import main.CustomComparatorAwards;
+import utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,83 +76,36 @@ public final class Main {
 
     String output = null;
 
-    int n;
-
-    Hashtable<String, User> users = new Hashtable<String, User>();
-    Hashtable<String, Movie> movies = new Hashtable<String, Movie>();
-    Hashtable<String, Show> shows = new Hashtable<String, Show>();
-    ArrayList<Actor> actors = new ArrayList<>();
-    ArrayList<Actor> aux = new ArrayList<>();
-    ArrayList<String> average = new ArrayList<>();
-    List<String> awards;
-    List<List<String>> filters;
-    User user;
+    Database data = new Database();
+    ArrayList<String> result = new ArrayList<>();
+    Util util = new Util();
     Movie movie;
     Show serial;
-    Actor actor;
-    int flag;
-
     // Formarea unui hashtable de users
-    for (int i = 0; i < input.getUsers().size(); i++) {
-      user = new User(input.getUsers().get(i).getUsername(),
-              input.getUsers().get(i).getSubscriptionType(),
-              input.getUsers().get(i).getFavoriteMovies(),
-              input.getUsers().get(i).getHistory());
-      users.put(user.getUsername(), user);
-    }
-
+    data.initUsers(input);
     // Formarea unui hashtable de filme
-    for (int i = 0; i < input.getMovies().size(); i++) {
-      movie = new Movie(input.getMovies().get(i).getTitle(),
-              input.getMovies().get(i).getYear(),
-              input.getMovies().get(i).getGenres(),
-              input.getMovies().get(i).getCast(),
-              input.getMovies().get(i).getDuration());
-      movies.put(movie.getTitle(), movie);
-    }
-
+    data.initMovies(input);
     // Formarea unui Hashtable de seriale
-    for (int i = 0; i < input.getSerials().size(); i++) {
-      // System.out.println("formeaza ht de seriale");
-      serial = new Show(input.getSerials().get(i).getTitle(),
-              input.getSerials().get(i).getYear(),
-              input.getSerials().get(i).getGenres(),
-              input.getSerials().get(i).getCast(),
-              input.getSerials().get(i).getSeasons());
-      shows.put(serial.getTitle(), serial);
-    }
-
+    data.initShows(input);
     // Formarea unui ArrayList de actori
-    for (int i = 0; i < input.getActors().size(); i++) {
-      actor = new Actor(input.getActors().get(i).getName(),
-              input.getActors().get(i).getCareerDescription(),
-              input.getActors().get(i).getFilmography(),
-              input.getActors().get(i).getAwards());
-      actors.add(actor);
-    }
-
+    data.initActors(input);
     // Parcurgerea comenzilor
     for (int i = 0; i < input.getCommands().size(); i++) {
-      // System.out.println(input.getCommands().get(i).getType());
       // FAVORITE
       if (input.getCommands().get(i).getType() != null &&
               input.getCommands().get(i).getType().equals("favorite") &&
               input.getCommands().get(i).getActionType().equals("command")) {
-        // System.out.println("intra in if");
-        output = users.get(input.getCommands().get(i).getUsername()).
+        output = data.getUsers().get(input.getCommands().get(i).getUsername()).
                 addFavourite(input.getCommands().get(i).getTitle());
-
         if (output != null) {
           arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
 
         }
-
       } else if (input.getCommands().get(i).getType() != null && // VIEW
                   input.getCommands().get(i).getType().equals("view") &&
                   input.getCommands().get(i).getActionType().equals("command")) {
-        output = users.get(input.getCommands().get(i).getUsername()).
+        output = data.getUsers().get(input.getCommands().get(i).getUsername()).
                 addView(input.getCommands().get(i).getTitle());
-
         if (output != null) {
           arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
         }
@@ -159,16 +113,15 @@ public final class Main {
                   input.getCommands().get(i).getType().equals("rating") &&
                   input.getCommands().get(i).getActionType().equals("command")) {
 
-        if (movies.get(input.getCommands().get(i).getTitle()) != null) { // PT FILME
-          movie = movies.get(input.getCommands().get(i).getTitle());
-          output = movie.addRating(input.getCommands().get(i).getGrade(), input.getCommands().get(i).getUsername(), users);
+        if (data.getMovies().get(input.getCommands().get(i).getTitle()) != null) { // PT FILME
+          movie = data.getMovies().get(input.getCommands().get(i).getTitle());
+          output = movie.addRating(input.getCommands().get(i).getGrade(), input.getCommands().get(i).getUsername(), data.getUsers());
 
-        } else if (shows.get(input.getCommands().get(i).getTitle()) != null) { // PT SERIALE
-          serial = shows.get(input.getCommands().get(i).getTitle());
+        } else if (data.getShows().get(input.getCommands().get(i).getTitle()) != null) { // PT SERIALE
+          serial = data.getShows().get(input.getCommands().get(i).getTitle());
           output = serial.addRating(input.getCommands().get(i).getGrade(), input.getCommands().get(i).getSeasonNumber(),
-                  input.getCommands().get(i).getUsername(), users);
+                  input.getCommands().get(i).getUsername(), data.getUsers());
         }
-
         if (output != null) {
           arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
         }
@@ -176,85 +129,354 @@ public final class Main {
                   input.getCommands().get(i).getCriteria() != null &&
                   input.getCommands().get(i).getCriteria().equals("average") &&
                   input.getCommands().get(i).getActionType().equals("query")) {
-
-        n = input.getCommands().get(i).getNumber();
-
-        aux = new ArrayList<>();
-        aux.addAll(actors);
-
-        for (Actor a : aux) {
-          a.setQueryCriteria("average");
-        }
-
-        for (int j = 0; j < aux.size(); j++) {
-          aux.get(j).makeRating(movies, shows);
-
-          if (aux.get(j).getRating() == -1) {
-            aux.remove(j);
-            j--;
-          }
-        }
-
-        if (input.getCommands().get(i).getSortType().equals("asc")) {
-          Collections.sort(aux);
-        } else if (input.getCommands().get(i).getSortType().equals("desc")) {
-          Collections.sort(aux, Collections.reverseOrder());
-        }
-
-        for (int nr = 0; nr < n && nr < aux.size(); nr++) {
-          average.add(aux.get(nr).getName());
-        }
-
-        output = Constants.queryResult + average;
-
+        output = Constants.queryResult + util.averageActors(input, data, i);
         if (output != null) {
           arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
         }
-       // System.out.println(output);
       } else if (input.getCommands().get(i).getActionType() != null && // AWARDS ACTORI
               input.getCommands().get(i).getCriteria() != null &&
               input.getCommands().get(i).getCriteria().equals("awards") &&
               input.getCommands().get(i).getActionType().equals("query")) {
-        aux = new ArrayList<>();
-        awards = new ArrayList<>();
-        filters = input.getCommands().get(i).getFilters();
-        awards = filters.get(3);
-
-        for (Actor a : actors) {
-          flag = 1;
-          a.setRelevantAwards(awards);
-          a.setQueryCriteria("awards");
-          for (String s : awards) {
-            if (a.getAwards().get(s) == null) {
-              flag = 0;
-            }
-          }
-
-          if (flag == 1) {
-            aux.add(a);
-          }
-        }
-
-        if (input.getCommands().get(i).getSortType().equals("asc")) {
-          Collections.sort(aux);
-        } else if (input.getCommands().get(i).getSortType().equals("desc")) {
-          Collections.sort(aux, Collections.reverseOrder());
-        }
-
-        output = Constants.queryResult + aux;
+        output = Constants.queryResult + util.awardActors(input, data, i);
 
         if (output != null) {
           arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
         }
-
       } else if (input.getCommands().get(i).getActionType() != null && // FILTER ACTORI
               input.getCommands().get(i).getCriteria() != null &&
               input.getCommands().get(i).getCriteria().equals("filter_description") &&
               input.getCommands().get(i).getActionType().equals("query")) {
+        output = Constants.queryResult + util.filteredActors(input, data, i);
+        if (output != null) {
+          arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+        }
+      } else if (input.getCommands().get(i).getActionType() != null && // RATING videos
+              input.getCommands().get(i).getCriteria() != null &&
+              input.getCommands().get(i).getActionType().equals("query") &&
+              input.getCommands().get(i).getCriteria().equals("ratings")) {
+        output = Constants.queryResult + util.videoRating(input, data, i);
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null && // fav videos
+              input.getCommands().get(i).getCriteria() != null &&
+              input.getCommands().get(i).getActionType().equals("query") &&
+              input.getCommands().get(i).getCriteria().equals("favorite")) {
+        if (input.getCommands().get(i).getObjectType().equals("movies")) {
+          result = util.favMovies(input, data, i);
+        } else if (input.getCommands().get(i).getObjectType().equals("shows")) {
+          result = util.favShows(input, data, i);
+        }
+        if (result != null) {
+          output = Constants.queryResult + result;
+        }
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null && // longest videos
+              input.getCommands().get(i).getCriteria() != null &&
+              input.getCommands().get(i).getActionType().equals("query") &&
+              input.getCommands().get(i).getCriteria().equals("longest")) {
+        if (input.getCommands().get(i).getObjectType().equals("movies")) {
+          output = Constants.queryResult + util.longestMovie(input, data, i);
+        } else if (input.getCommands().get(i).getObjectType().equals("shows")) {
+          output = Constants.queryResult + util.longestShow(input, data, i);
+        }
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null && // most viewed videos
+              input.getCommands().get(i).getCriteria() != null &&
+              input.getCommands().get(i).getActionType().equals("query") &&
+              input.getCommands().get(i).getCriteria().equals("most_viewed")) {
+        if (input.getCommands().get(i).getObjectType().equals("movies")) {
+          result = util.mostViewedMovies(input, data, i);
+        } else if (input.getCommands().get(i).getObjectType().equals("shows")) {
+          result = util.mostViewedShows(input, data, i);
+        }
+        output = Constants.queryResult + result;
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null && // user ratings
+              input.getCommands().get(i).getCriteria() != null &&
+              input.getCommands().get(i).getActionType().equals("query") &&
+              input.getCommands().get(i).getCriteria().equals("num_ratings")) {
+        output = Constants.queryResult + util.userRatings(input, data, i);
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null &&    // recommended standard
+              input.getCommands().get(i).getType() != null &&
+              input.getCommands().get(i).getActionType().equals("recommendation") &&
+              input.getCommands().get(i).getType().equals("standard")) {
+        output = null;
+        int flag = 0;
+        String recommended = null;
 
+        if (data.getUsers().get(input.getCommands().get(i).getUsername()) == null) {
+          output = Constants.standardRecommendation + Constants.applied;
+          flag = 2;
+        }
+        if (flag == 0) {
+          for (Movie m : data.getMovies().values()) {
+            if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(m.getTitle()) == null) {
+              flag = 1;
+              recommended = m.getTitle();
+            }
+          }
+        }
+
+        if (flag == 0) {
+          for (Show sh : data.getShows().values()) {
+            if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(sh.getTitle()) == null) {
+              flag = 1;
+              recommended = sh.getTitle();
+            }
+          }
+        }
+
+        if (flag == 1) {
+          output = Constants.standardRecommendation + Constants.result + recommended;
+        }
+        if (output == null) {
+          output = Constants.standardRecommendation + Constants.applied;
+        }
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null &&    // recommended standard
+              input.getCommands().get(i).getType() != null &&
+              input.getCommands().get(i).getActionType().equals("recommendation") &&
+              input.getCommands().get(i).getType().equals("best_unseen")) {
+        ArrayList<Movie> unseeenMovies = new ArrayList<>();
+        ArrayList<Show> unseenShows = new ArrayList<>();
+        for (Movie m : data.getMovies().values()) {
+          if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(m.getTitle()) == null) {
+            unseeenMovies.add(m);
+            double rating = unseeenMovies.get(unseeenMovies.size() - 1).makeMovieRating();
+            unseeenMovies.get(unseeenMovies.size() - 1).setVideoRating(rating);
+          }
+        }
+
+        for (Show sh : data.getShows().values()) {
+          if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(sh.getTitle()) == null) {
+            unseenShows.add(sh);
+            double rating = unseenShows.get(unseenShows.size() - 1).makeShowRating();
+            unseenShows.get(unseenShows.size() - 1).setVideoRating(rating);
+          }
+        }
+        if (unseeenMovies.size() != 0 && unseenShows.size() != 0) {
+          if (unseenShows.get(0).getVideoRating() > unseeenMovies.get(0).getVideoRating()) {
+            output = Constants.bestRatedRecommendation + Constants.result + unseenShows.get(0).getTitle();
+          } else {
+            output = Constants.bestRatedRecommendation + Constants.result + unseeenMovies.get(0).getTitle();
+          }
+        } else if (unseeenMovies.size() != 0) {
+          output = Constants.bestRatedRecommendation + Constants.result + unseeenMovies.get(0).getTitle();
+        } else if (unseenShows.size() != 0) {
+          output = Constants.bestRatedRecommendation + Constants.result + unseenShows.get(0).getTitle();
+        } else {
+          output = Constants.bestRatedRecommendation + Constants.applied;
+        }
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null &&    // popular recom
+              input.getCommands().get(i).getType() != null &&
+              input.getCommands().get(i).getActionType().equals("recommendation") &&
+              input.getCommands().get(i).getType().equals("popular")) {
+        int flag = 0;
+        String recommended = null;
+        // System.out.println("userul " + input.getCommands().get(i).getUsername() + " este " + data.getUsers().get(input.getCommands().get(i).getUsername()).getCategory());
+        if (data.getUsers().get(input.getCommands().get(i).getUsername()) == null
+        || data.getUsers().get(input.getCommands().get(i).getUsername()).getCategory().equals("BASIC")) {
+          // System.out.println("intra pt userul " + input.getCommands().get(i).getUsername());
+          output = Constants.popularRecommendation + Constants.applied;
+        } else {
+          ArrayList<Movie> unseenMovies = new ArrayList<>();
+          ArrayList<Show> unseenShows = new ArrayList<>();
+          HashMap<String, Genres> popularGenres = new HashMap<String, Genres>();
+          for (Movie m : data.getMovies().values()) {
+            if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(m.getTitle()) == null) {
+              unseenMovies.add(m);
+              for (String s : m.getGenres()) {
+                if (popularGenres.get(s) != null) {
+                  popularGenres.get(s).setApparitions(popularGenres.get(s).getApparitions() + 1);
+                  popularGenres.get(s).setApparitions(popularGenres.get(s).getApparitions() + 1);
+                } else {
+                  Genres g = new Genres(s, 1);
+                  popularGenres.put(g.getName(), g);
+                }
+              }
+            }
+          }
+
+          for (Show sh : data.getShows().values()) {
+            if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(sh.getTitle()) == null) {
+              unseenShows.add(sh);
+              for (String s : sh.getGenres()) {
+                if (popularGenres.get(s) != null) {
+                  popularGenres.get(s).setApparitions(popularGenres.get(s).getApparitions() + 1);
+                  popularGenres.get(s).setApparitions(popularGenres.get(s).getApparitions() + 1);
+                } else {
+                  Genres g = new Genres(s, 1);
+                  popularGenres.put(g.getName(), g);
+                }
+              }
+            }
+          }
+          ArrayList<Genres> genreOrder = new ArrayList<Genres>(popularGenres.values());
+          Collections.sort(genreOrder, Collections.reverseOrder());
+          flag = 0;
+
+          for (Genres g : genreOrder) {
+            for (Movie m : unseenMovies) {
+              if (m.getGenres().contains(g.getName())) {
+                flag = 1;
+                output = Constants.popularRecommendation + Constants.result + m.getTitle();
+                break;
+              }
+            }
+            if (flag == 1) {
+              break;
+            }
+            for (Show sh : unseenShows) {
+              if (sh.getGenres().contains(g.getName())) {
+                flag = 1;
+                output = Constants.popularRecommendation + Constants.result + sh.getTitle();
+                break;
+              }
+              if (flag == 1) {
+                break;
+              }
+            }
+          }
+
+          if (flag == 0) {
+            output = Constants.popularRecommendation + Constants.applied;
+          }
+        }
+        // System.out.println("pt userul " + input.getCommands().get(i).getUsername() + " outputul este " + output);
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null &&    // fav recom
+              input.getCommands().get(i).getType() != null &&
+              input.getCommands().get(i).getActionType().equals("recommendation") &&
+              input.getCommands().get(i).getType().equals("favorite")) {
+        User user = data.getUsers().get(input.getCommands().get(i).getUsername());
+        ArrayList<Movie> unseenMovies = new ArrayList<>();
+        ArrayList<Show> unseenShows = new ArrayList<>();
+        if (user == null || user.getCategory().equals("BASIC")) {
+          output = Constants.favoriteRecommendation + Constants.applied;
+        } else {
+          for (Movie m : data.getMovies().values()) {
+            if (user.getViews().get(m.getTitle()) == null) {
+              unseenMovies.add(m);
+            }
+          }
+
+          for (Show sh : data.getShows().values()) {
+            if (user.getViews().get(sh.getTitle()) == null) {
+              unseenShows.add(sh);
+            }
+          }
+
+          for (User u : data.getUsers().values()) {
+            for (String s : u.getFavs()) {
+              for (Movie m : unseenMovies) {
+                m.setCriteria("favorite");
+                if (m.getTitle().equals(s)) {
+                  m.addFav();
+                }
+              }
+            }
+          }
+
+          for (User u : data.getUsers().values()) {
+            for (String s : u.getFavs()) {
+              for (Show sh : unseenShows) {
+                sh.setCriteria("favorite");
+                if (sh.getTitle().equals(s)) {
+                  sh.addFav();
+                }
+              }
+            }
+          }
+
+          for (int j = 0; j < unseenMovies.size(); j++) {
+            if (unseenMovies.get(j).getNoFavs() == 0) {
+              unseenMovies.remove(j);
+              j--;
+            }
+          }
+          for (int j = 0; j < unseenShows.size(); j++) {
+            if (unseenShows.get(j).getNoFavs() == 0) {
+              unseenShows.remove(j);
+              j--;
+            }
+          }
+          Collections.sort(unseenMovies, Collections.reverseOrder());
+          Collections.sort(unseenShows, Collections.reverseOrder());
+
+          if (unseenMovies.size() != 0) {
+            if (unseenShows.size() != 0 && unseenMovies.get(0).getNoFavs() < unseenShows.get(0).getNoFavs()) {
+              output = Constants.favoriteRecommendation + Constants.result + unseenShows.get(0).getTitle();
+            } else {
+              output = Constants.favoriteRecommendation + Constants.result + unseenMovies.get(0).getTitle();
+            }
+          } else {
+            if (unseenShows.size() != 0) {
+              output = Constants.favoriteRecommendation + Constants.result + unseenShows.get(0).getTitle();
+            } else {
+              output =  Constants.favoriteRecommendation + Constants.applied;
+            }
+          }
+        }
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
+      } else if (input.getCommands().get(i).getActionType() != null &&    // fav recom
+              input.getCommands().get(i).getType() != null &&
+              input.getCommands().get(i).getActionType().equals("recommendation") &&
+              input.getCommands().get(i).getType().equals("search")) {
+        String genre = input.getCommands().get(i).getGenre();
+        User user = data.getUsers().get(input.getCommands().get(i).getUsername());
+        if (user == null || user.getCategory().equals("BASIC")) {
+          output = Constants.searchRecommendation + Constants.applied;
+        } else {
+          ArrayList<Movie> unseenMovies = new ArrayList<>();
+          ArrayList<Show> unseenShows = new ArrayList<>();
+          ArrayList<Video> unseenVideos = new ArrayList<>();
+
+          for (Movie m : data.getMovies().values()) {
+            if (m.getGenres().contains(genre)) {
+              if (!user.getViews().containsKey(m.getTitle())) {
+                unseenMovies.add(m);
+              }
+            }
+          }
+
+          for (Show sh : data.getShows().values()) {
+            if (sh.getGenres().contains(genre)) {
+              if (!user.getViews().containsKey(sh.getTitle())) {
+                unseenShows.add(sh);
+              }
+            }
+          }
+
+          for (Movie m : unseenMovies) {
+            Video v = new Video(m.getTitle(), m.getYear(), m.getGenres(), m.getCast(), m.getDuration());
+            v.setVideoRating(m.makeMovieRating());
+            v.setCriteria("ratings");
+            unseenVideos.add(v);
+          }
+
+          for (Show sh : unseenShows) {
+            Video v = new Video(sh.getTitle(), sh.getYear(), sh.getGenres(), sh.getCast(), sh.getDuration());
+            v.setVideoRating(sh.makeShowRating());
+            v.setCriteria("ratings");
+            unseenVideos.add(v);
+          }
+
+          Collections.sort(unseenVideos);
+          result = new ArrayList<>();
+          if (unseenVideos.size() != 0) {
+            for (Video v : unseenVideos) {
+              result.add(v.getTitle());
+            }
+
+            output = Constants.searchRecommendation + Constants.result + result;
+          } else {
+            output = Constants.searchRecommendation + Constants.applied;
+          }
+        }
+        arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
       }
     }
-
     fileWriter.closeJSON(arrayResult);
   }
 }
