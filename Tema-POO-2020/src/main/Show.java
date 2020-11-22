@@ -49,7 +49,6 @@ public class Show extends Video{
 
   public double makeShowRating() {
     double rating = -1;
-    int noRates = 0;
 
     for (mySeason i : this.seasons) {
       if (i.makeSeasonRating() != 0.00) {
@@ -57,7 +56,6 @@ public class Show extends Video{
           rating = 0;
         }
         rating = rating + i.makeSeasonRating();
-        noRates = noRates + 1;
       }
     }
 
@@ -85,5 +83,10 @@ public class Show extends Video{
     this.seasons.get(seasonNo - 1).addRatedBy(username);
     users.get(username).setNoRatings(users.get(username).getNoRatings() + 1);
     return Constants.rateSuccess1 + this.getTitle() + Constants.rateSuccess2 + rating + Constants.rateSuccess3 + username;
+  }
+
+  @Override
+  public String toString() {
+    return this.getTitle();
   }
 }

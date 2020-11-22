@@ -90,7 +90,7 @@ public class Util {
   public ArrayList<String> filteredActors(Input input, Database data, int i) {
     List<List<String>> filters = input.getCommands().get(i).getFilters();
     List<String> words = filters.get(2);
-    System.out.println("the words are " + words);
+    // System.out.println("the words are " + words);
     ArrayList<Actor> aux = new ArrayList<>();
     int flag;
     ArrayList<String> filteredActors = new ArrayList<>();
@@ -100,21 +100,21 @@ public class Util {
       flag = 1;
       for (String s : words) {
         if (!a.getCareerDesc().contains(s)) {
-          System.out.println("Actorul " + a.getName() + " nu are cuvantul " + s);
+       //   System.out.println("Actorul " + a.getName() + " nu are cuvantul " + s);
           flag = 0;
         } else {
-          System.out.println("Actorul " + a.getName() + " are cuvantul " + s);
+         // System.out.println("Actorul " + a.getName() + " are cuvantul " + s);
           int index = a.getCareerDesc().indexOf(s);
           while (index != -1 && index < a.getCareerDesc().length()) {
             if (index > 0) {
               if (Constants.alphabet.indexOf(a.getCareerDesc().charAt(index - 1)) != -1) {
-                System.out.println("Actorul " + a.getName() + " nu are cuvantul " + s + " deoarece e in mijl altui cuvant");
-                System.out.println(a.getCareerDesc().charAt(index - 1));
+           //     System.out.println("Actorul " + a.getName() + " nu are cuvantul " + s + " deoarece e in mijl altui cuvant");
+             //   System.out.println(a.getCareerDesc().charAt(index - 1));
               } else if (index + s.length() < a.getCareerDesc().length() && Constants.alphabet.indexOf(a.getCareerDesc().charAt(index + s.length())) != -1) {
-                System.out.println("Actorul " + a.getName() + " nu are cuvantul " + s + " deoarece e in mijl altui cuvant partea a 2a");
-                System.out.println(a.getCareerDesc().charAt(index + s.length()));
+             //   System.out.println("Actorul " + a.getName() + " nu are cuvantul " + s + " deoarece e in mijl altui cuvant partea a 2a");
+              //  System.out.println(a.getCareerDesc().charAt(index + s.length()));
               } else {
-                System.out.println("Actorul " + a.getName() + " are de fapt cuvantul " + s);
+              //  System.out.println("Actorul " + a.getName() + " are de fapt cuvantul " + s);
                 break;
               }
             }
@@ -155,7 +155,7 @@ public class Util {
 
     int n = input.getCommands().get(i).getNumber();
 
-    if (input.getCommands().get(i).getObjectType().equals("movie")) {
+    if (input.getCommands().get(i).getObjectType().equals("movies")) {
       mfilter.setVideos(movieList);
       if (input.getCommands().get(i).getFilters().get(0).get(0) != null) {
         mfilter.setVideos(mfilter.filterByYear(Integer.parseInt(input.getCommands().get(i).getFilters().get(0).get(0))));
@@ -176,7 +176,7 @@ public class Util {
     ArrayList<Movie> auxMovies = new ArrayList<>();
     ArrayList<Show> auxShows = new ArrayList<>();
 
-    if (input.getCommands().get(i).getObjectType().equals("movie")) {
+    if (input.getCommands().get(i).getObjectType().equals("movies")) {
       auxMovies.addAll(mfilter.getVideos());
 
       for (Movie m : auxMovies) {
@@ -200,12 +200,13 @@ public class Util {
       for (int j = 0; j < n && j < auxMovies.size(); j++) {
         result.add(auxMovies.get(j).getTitle());
       }
-    } else if (input.getCommands().get(i).getObjectType().equals("show")) {
+    } else if (input.getCommands().get(i).getObjectType().equals("shows")) {
       auxShows.addAll(sfilter.getVideos());
 
       for (Show sh : auxShows) {
         sh.setVideoRating(sh.makeShowRating());
       }
+      // System.out.println(auxShows);
 
       for (int j = 0; j < auxShows.size(); j++) {
         if (auxShows.get(j).getVideoRating() == -1) {
@@ -458,6 +459,7 @@ public class Util {
     showList = filter.getVideos();
 
     for (Show sh : showList) {
+      sh.setNoViews(0);
       sh.setCriteria("most_viewed");
     }
 

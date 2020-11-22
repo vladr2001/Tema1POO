@@ -2,9 +2,7 @@ package main;
 
 import common.Constants;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 
 public class User implements Comparable<User> {
@@ -21,9 +19,9 @@ public class User implements Comparable<User> {
     this.favs = new ArrayList<>();
     this.noRatings = 0;
 
-    for (int i = 0; i < favs.size(); i++) {
-      if (views.get(favs.get(i)) != null) {
-        this.favs.add(favs.get(i));
+    for (String fav : favs) {
+      if (views.get(fav) != null) {
+        this.favs.add(fav);
       }
     }
   }
@@ -78,7 +76,7 @@ public class User implements Comparable<User> {
     }
 
     for (String i : this.favs) {
-      if (i.equals(fav) == true) {
+      if (i.equals(fav)) {
         return Constants.favErrDuplicate1 + fav + Constants.getFavErrDuplicate2;
       }
     }
@@ -103,7 +101,7 @@ public class User implements Comparable<User> {
 
   @Override
   public int compareTo(User o) {
-    if (Integer.compare(this.getNoRatings(), o.getNoRatings()) != 0) {
+    if (!this.getNoRatings().equals(o.getNoRatings())) {
       return Integer.compare(this.getNoRatings(), o.getNoRatings());
     } else {
       return String.CASE_INSENSITIVE_ORDER.compare(this.getUsername(), o.getUsername());

@@ -93,6 +93,10 @@ public class Video implements  Comparable<Video>{
     return this.noFavs;
   }
 
+  public void setNoFavs(int noFavs) { this.noFavs = noFavs;}
+
+  public void setNoViews(int views) {this.noViews = views;}
+
   public void addFav() {
     this.noFavs = this.noFavs + 1;
   }
@@ -134,6 +138,14 @@ public class Video implements  Comparable<Video>{
       } else {
         return String.CASE_INSENSITIVE_ORDER.compare(this.getTitle(), o.getTitle());
       }
+    }
+
+    if (this.getCriteria().equals("ratings_recom")) {
+      return Double.compare(this.videoRating, o.videoRating);
+    }
+
+    if (this.getCriteria().equals("favorite_recom")) {
+      return Integer.compare(this.getNoFavs(), o.getNoFavs());
     }
     return 0;
   }

@@ -211,8 +211,10 @@ public final class Main {
         if (flag == 0) {
           for (Movie m : data.getMovies().values()) {
             if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(m.getTitle()) == null) {
+              // System.out.println("Utilizatorul " + input.getCommands().get(i).getUsername() + " n a vazut " + );
               flag = 1;
               recommended = m.getTitle();
+              break;
             }
           }
         }
@@ -222,6 +224,7 @@ public final class Main {
             if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(sh.getTitle()) == null) {
               flag = 1;
               recommended = sh.getTitle();
+              break;
             }
           }
         }
@@ -233,7 +236,7 @@ public final class Main {
           output = Constants.standardRecommendation + Constants.applied;
         }
         arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
-      } else if (input.getCommands().get(i).getActionType() != null &&    // recommended standard
+      } else if (input.getCommands().get(i).getActionType() != null &&    // recommended best
               input.getCommands().get(i).getType() != null &&
               input.getCommands().get(i).getActionType().equals("recommendation") &&
               input.getCommands().get(i).getType().equals("best_unseen")) {
@@ -241,6 +244,7 @@ public final class Main {
         ArrayList<Show> unseenShows = new ArrayList<>();
         for (Movie m : data.getMovies().values()) {
           if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(m.getTitle()) == null) {
+            m.setCriteria("ratings_recom");
             unseeenMovies.add(m);
             double rating = unseeenMovies.get(unseeenMovies.size() - 1).makeMovieRating();
             unseeenMovies.get(unseeenMovies.size() - 1).setVideoRating(rating);
@@ -249,12 +253,17 @@ public final class Main {
 
         for (Show sh : data.getShows().values()) {
           if (data.getUsers().get(input.getCommands().get(i).getUsername()).getViews().get(sh.getTitle()) == null) {
+            sh.setCriteria("ratings_recom");
             unseenShows.add(sh);
             double rating = unseenShows.get(unseenShows.size() - 1).makeShowRating();
             unseenShows.get(unseenShows.size() - 1).setVideoRating(rating);
           }
         }
+        Collections.sort(unseeenMovies, Collections.reverseOrder());
+        Collections.sort(unseenShows, Collections.reverseOrder());
+        // System.out.println("Pt userul " + input.getCommands().get(i).getUsername() + " filmele sunt " + unseeenMovies + " iar serialele sunt " + unseenShows);
         if (unseeenMovies.size() != 0 && unseenShows.size() != 0) {
+         // System.out.println("Pt " + input.getCommands().get(i).getUsername() + " filmul este " + unseeenMovies.get(0).getTitle() + " iar serialul este " + unseenShows.get(0).getTitle());
           if (unseenShows.get(0).getVideoRating() > unseeenMovies.get(0).getVideoRating()) {
             output = Constants.bestRatedRecommendation + Constants.result + unseenShows.get(0).getTitle();
           } else {
@@ -355,24 +364,32 @@ public final class Main {
         if (user == null || user.getCategory().equals("BASIC")) {
           output = Constants.favoriteRecommendation + Constants.applied;
         } else {
+       //   System.out.println("PT USERUL " + user.getUsername());
           for (Movie m : data.getMovies().values()) {
             if (user.getViews().get(m.getTitle()) == null) {
+              m.setNoFavs(0);
               unseenMovies.add(m);
+              if (m.getTitle().equals("Ed Wood")) {
+             //   System.out.println("la ed wood la adaugare " + m.getNoFavs());
+              }
             }
           }
 
           for (Show sh : data.getShows().values()) {
             if (user.getViews().get(sh.getTitle()) == null) {
+              sh.setNoFavs(0);
               unseenShows.add(sh);
             }
           }
-
+         // System.out.println("Userul " + user.getUsername() + " n a vazut " + unseenMovies);
           for (User u : data.getUsers().values()) {
             for (String s : u.getFavs()) {
               for (Movie m : unseenMovies) {
-                m.setCriteria("favorite");
+                m.setCriteria("favorite_recom");
                 if (m.getTitle().equals(s)) {
+           //       System.out.println("Current user inainte de if " + user.getUsername() + " la filmul " + m.getTitle() + " e la fav de " + m.getNoFavs());
                   m.addFav();
+             //     System.out.println("Current user " + user.getUsername() + " la filmul " + m.getTitle() + " e la fav de " + m.getNoFavs());
                 }
               }
             }
@@ -381,7 +398,7 @@ public final class Main {
           for (User u : data.getUsers().values()) {
             for (String s : u.getFavs()) {
               for (Show sh : unseenShows) {
-                sh.setCriteria("favorite");
+                sh.setCriteria("favorite_recom");
                 if (sh.getTitle().equals(s)) {
                   sh.addFav();
                 }
@@ -404,6 +421,13 @@ public final class Main {
           Collections.sort(unseenMovies, Collections.reverseOrder());
           Collections.sort(unseenShows, Collections.reverseOrder());
 
+        //    System.out.println("Pt userul " + user.getUsername() + " filmele recom fav sunt " + unseenMovies + " si serialele sunt " + unseenShows);
+     //     for (Movie m : unseenMovies) {
+          //  System.out.println(m.getTitle() +" " + m.getNoFavs());
+       //   }
+         // for (User u : data.getUsers().values()) {
+           // System.out.println(u.getFavs());
+       //   }
           if (unseenMovies.size() != 0) {
             if (unseenShows.size() != 0 && unseenMovies.get(0).getNoFavs() < unseenShows.get(0).getNoFavs()) {
               output = Constants.favoriteRecommendation + Constants.result + unseenShows.get(0).getTitle();
@@ -419,7 +443,7 @@ public final class Main {
           }
         }
         arrayResult.add(fileWriter.writeFile(input.getCommands().get(i).getActionId(), null, output));
-      } else if (input.getCommands().get(i).getActionType() != null &&    // fav recom
+      } else if (input.getCommands().get(i).getActionType() != null &&    // search recom
               input.getCommands().get(i).getType() != null &&
               input.getCommands().get(i).getActionType().equals("recommendation") &&
               input.getCommands().get(i).getType().equals("search")) {

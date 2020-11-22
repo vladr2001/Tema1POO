@@ -141,7 +141,7 @@ public class Actor implements  Comparable<Actor>{
         return Integer.compare(this.noAwards, o.noAwards);
       }
       return String.CASE_INSENSITIVE_ORDER.compare(this.getName(), o.getName());
-    } else if (this.queryCriteria.equals("filter")) {
+    } else if (this.queryCriteria.equals("filter_description")) {
       return String.CASE_INSENSITIVE_ORDER.compare(this.getName(), o.getName());
     }
 
