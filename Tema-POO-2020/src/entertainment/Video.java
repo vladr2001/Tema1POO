@@ -1,8 +1,10 @@
-package main;
+package entertainment;
+
+import common.Constants;
 
 import java.util.ArrayList;
 
-public class Video implements  Comparable<Video>{
+public class Video implements  Comparable<Video> {
   private String title;
   private int year;
   private ArrayList<String> cast;
@@ -14,7 +16,8 @@ public class Video implements  Comparable<Video>{
   private int noViews;
 
 
-  public Video(String title, int year, ArrayList<String> genres, ArrayList<String> cast, int length) {
+  public Video(final String title, final int year, final ArrayList<String> genres,
+               final ArrayList<String> cast, final int length) {
     this.title = title;
     this.year = year;
     this.genres = new ArrayList<>();
@@ -33,106 +36,122 @@ public class Video implements  Comparable<Video>{
     }
   }
 
-  public String getTitle() {
+  public final String getTitle() {
     return title;
   }
 
-  public void setTitle(String title) {
+  public final void setTitle(final String title) {
     this.title = title;
   }
 
-  public int getYear() {
+  public final int getYear() {
     return year;
   }
 
-  public void setYear(int year) {
+  public final void setYear(final int year) {
     this.year = year;
   }
 
-  public ArrayList<String> getCast() {
+  public final ArrayList<String> getCast() {
     return cast;
   }
 
-  public void setCast(ArrayList<String> cast) {
+  public final void setCast(final ArrayList<String> cast) {
     this.cast = cast;
   }
 
-  public ArrayList<String> getGenres() {
+  public final ArrayList<String> getGenres() {
     return genres;
   }
 
-  public void setGenres(ArrayList<String> genres) {
+  public final void setGenres(final ArrayList<String> genres) {
     this.genres = genres;
   }
 
-  public void setVideoRating(double rating) {
+  public final void setVideoRating(final double rating) {
     this.videoRating = rating;
   }
 
-  public double getVideoRating() {
+  public final double getVideoRating() {
     return this.videoRating;
   }
 
-  public void setCriteria(String criteria) {
-    this.criteria = criteria;
+  public final void setCriteria(final String crit) {
+    this.criteria = crit;
   }
 
-  public String getCriteria() {
+  public final String getCriteria() {
     return this.criteria;
   }
 
-  public void setDuration(int duration) {
+  public final void setDuration(final int duration) {
     this.duration = duration;
   }
 
-  public int getDuration() {
+  public final int getDuration() {
     return this.duration;
   }
 
-  public int getNoFavs() {
+  public final int getNoFavs() {
     return this.noFavs;
   }
 
-  public void setNoFavs(int noFavs) { this.noFavs = noFavs;}
+  public final void setNoFavs(final int favs) {
+    this.noFavs = favs;
+  }
 
-  public void setNoViews(int views) {this.noViews = views;}
+  public final void setNoViews(final int views) {
+    this.noViews = views;
+  }
 
-  public void addFav() {
+  /**
+   *
+   */
+  public final void addFav() {
     this.noFavs = this.noFavs + 1;
   }
 
-  public void addViews(int noViews) {
-    this.noViews = this.noViews + noViews;
+  /**
+   *
+   * @param views numaru de views care trebuie adaugat
+   */
+  public final void addViews(final int views) {
+    this.noViews = this.noViews + views;
   }
 
-  public int getNoViews() {
+  public final int getNoViews() {
     return this.noViews;
   }
 
+  /**
+   *
+   * @param o obiectul auxiliar
+   * @return rezultatul comparatiei
+   */
   @Override
-  public int compareTo(Video o) {
-    if (this.getCriteria().equals("ratings")) {
+  public int compareTo(final Video o) {
+    if (this.getCriteria().equals(Constants.RATINGS)) {
       if (Double.compare(this.videoRating, o.videoRating) != 0) {
         return Double.compare(this.videoRating, o.videoRating);
       } else {
         return String.CASE_INSENSITIVE_ORDER.compare(this.getTitle(), o.getTitle());
       }
     }
-    if (this.getCriteria().equals("favorite")) {
+    if (this.getCriteria().equals(Constants.FAVORITE)) {
       if (Integer.compare(this.getNoFavs(), o.getNoFavs()) != 0) {
         return Integer.compare(this.getNoFavs(), o.getNoFavs());
       } else {
         return String.CASE_INSENSITIVE_ORDER.compare(this.getTitle(), o.getTitle());
       }
     }
-    if (this.getCriteria().equals("longest")) {
+    if (this.getCriteria().equals(Constants.LONGEST)) {
       if (Integer.compare(this.duration, o.duration) != 0) {
         return Integer.compare(this.duration, o.duration);
       } else {
         return String.CASE_INSENSITIVE_ORDER.compare(this.getTitle(), o.getTitle());
       }
     }
-    if (this.getCriteria().equals("most_viewed")) {
+    if (this.getCriteria().equals(Constants.MOSTVIEWED)) {
       if (Integer.compare(this.getNoViews(), o.getNoViews()) != 0) {
         return Integer.compare(this.getNoViews(), o.getNoViews());
       } else {
@@ -140,11 +159,11 @@ public class Video implements  Comparable<Video>{
       }
     }
 
-    if (this.getCriteria().equals("ratings_recom")) {
+    if (this.getCriteria().equals(Constants.RATINGSRECOM)) {
       return Double.compare(this.videoRating, o.videoRating);
     }
 
-    if (this.getCriteria().equals("favorite_recom")) {
+    if (this.getCriteria().equals(Constants.FAVRECOM)) {
       return Integer.compare(this.getNoFavs(), o.getNoFavs());
     }
     return 0;

@@ -1,11 +1,15 @@
-package main;
+package database;
 
+import actor.Actor;
+import entertainment.Movie;
+import entertainment.Show;
+import entertainment.User;
 import fileio.Input;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+// Clasa in care se afla baza de date
 public class Database {
   private LinkedHashMap<String, User> users;
   private LinkedHashMap<String, Movie> movies;
@@ -18,7 +22,12 @@ public class Database {
     actors = new ArrayList<>();
   }
 
-  public void initUsers(Input input) {
+  /**
+   *
+   * @param input pentru input
+   */
+  public final void initUsers(final Input input) {
+    // Initializarea structurii de utilizatori
     User user;
     for (int i = 0; i < input.getUsers().size(); i++) {
       user = new User(input.getUsers().get(i).getUsername(),
@@ -29,7 +38,12 @@ public class Database {
     }
   }
 
-  public void initMovies(Input input) {
+  /**
+   *
+   * @param input pentru input
+   */
+  public final void initMovies(final Input input) {
+    // Initializare structurii de filme
     Movie movie;
     for (int i = 0; i < input.getMovies().size(); i++) {
       movie = new Movie(input.getMovies().get(i).getTitle(),
@@ -41,10 +55,14 @@ public class Database {
     }
   }
 
-  public void initShows(Input input) {
+  /**
+   *
+   * @param input pentru input
+   */
+  public final void initShows(final Input input) {
+    // Initializarea structurii de seriale
     Show serial;
     for (int i = 0; i < input.getSerials().size(); i++) {
-      // System.out.println("formeaza ht de seriale");
       serial = new Show(input.getSerials().get(i).getTitle(),
               input.getSerials().get(i).getYear(),
               input.getSerials().get(i).getGenres(),
@@ -55,7 +73,12 @@ public class Database {
     }
   }
 
-  public void initActors(Input input) {
+  /**
+   *
+   * @param input pentru input
+   */
+  public final void initActors(final Input input) {
+    // Initializarea structurii de actori
     Actor actor;
     for (int i = 0; i < input.getActors().size(); i++) {
       actor = new Actor(input.getActors().get(i).getName(),
@@ -66,35 +89,35 @@ public class Database {
     }
   }
 
-  public LinkedHashMap<String, User> getUsers() {
+  public final LinkedHashMap<String, User> getUsers() {
     return users;
   }
 
-  public void setUsers(LinkedHashMap<String, User> users) {
+  public final void setUsers(final LinkedHashMap<String, User> users) {
     this.users = users;
   }
 
-  public LinkedHashMap<String, Movie> getMovies() {
+  public final LinkedHashMap<String, Movie> getMovies() {
     return movies;
   }
 
-  public void setMovies(LinkedHashMap<String, Movie> movies) {
+  public final void setMovies(final LinkedHashMap<String, Movie> movies) {
     this.movies = movies;
   }
 
-  public LinkedHashMap<String, Show> getShows() {
+  public final LinkedHashMap<String, Show> getShows() {
     return shows;
   }
 
-  public void setShows(LinkedHashMap<String, Show> shows) {
+  public final void setShows(final LinkedHashMap<String, Show> shows) {
     this.shows = shows;
   }
 
-  public ArrayList<Actor> getActors() {
+  public final ArrayList<Actor> getActors() {
     return actors;
   }
 
-  public void setActors(ArrayList<Actor> actors) {
+  public final void setActors(final ArrayList<Actor> actors) {
     this.actors = actors;
   }
 }

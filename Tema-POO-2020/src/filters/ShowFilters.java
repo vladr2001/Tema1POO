@@ -1,4 +1,6 @@
-package main;
+package filters;
+
+import entertainment.Show;
 
 import java.util.ArrayList;
 
@@ -9,19 +11,28 @@ public class ShowFilters {
     this.videos = new ArrayList<>();
   }
 
-  public void addVideo(Show v) {
+  /**
+   *
+   * @param v un serial
+   */
+  public final void addVideo(final Show v) {
     this.videos.add(v);
   }
 
-  public void setVideos(ArrayList<Show> videos) {
+  public final void setVideos(final ArrayList<Show> videos) {
     this.videos = videos;
   }
 
-  public ArrayList<Show> getVideos() {
+  public final ArrayList<Show> getVideos() {
     return this.videos;
   }
 
-  public ArrayList<Show> filterByYear(int year) {
+  /**
+   *
+   * @param year anul dupa care e filtrata lista
+   * @return lista noua, in care sunt doar seriale din acel an
+   */
+  public final ArrayList<Show> filterByYear(final int year) {
     ArrayList<Show> newVideos = new ArrayList<>();
     for (Show i : this.getVideos()) {
       if (i.getYear() == year) {
@@ -32,7 +43,12 @@ public class ShowFilters {
     return newVideos;
   }
 
-  public ArrayList<Show> filterByGenre(String genre) {
+  /**
+   *
+   * @param genre genul dupa care trebuie filtrata
+   * @return lista noua, in care sunt doar videoclipurile din acel gen
+   */
+  public final ArrayList<Show> filterByGenre(final String genre) {
     ArrayList<Show> newVideos = new ArrayList<>();
     for (Show i : this.getVideos()) {
       if (i.getGenres().contains(genre)) {
